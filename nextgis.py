@@ -33,7 +33,7 @@ from config import Config  # Параметры записаны в файл con
 #         return f'⚠ Ошибка (ресурс вернул - {exc})'
 
 
-def ngw_post_wi_checkup(fid_wi_point, plate_exist, date_time, geom, air_temp=None):
+def ngw_post_wi_checkup(fid_wi, checkout, water, workable, entrance, plate_exist, date_time, geom, air_temp=None):
     """ Создать запись о проверке
     Функция выполняет запрос к NextGIS WEB - создает запись о проверке в таблице.
     При удачном запросе вернувшийся ИД новой записи вносит в поле id таблицы
@@ -46,17 +46,22 @@ def ngw_post_wi_checkup(fid_wi_point, plate_exist, date_time, geom, air_temp=Non
                         "description": None
                         },
                     "fields": {
-                        "id_wi_point": fid_wi_point,
-                        "plate_exist": plate_exist,
-                        "date_time": {
+                        "ИД_ВИ": fid_wi,
+                        "Вид_контроля": checkout,
+                        "Наличие_воды": water,
+                        "Установка_ПА": workable,
+                        "Подъезд_ПА": entrance,
+                        "Указатель_ВИ": plate_exist,
+                        "Примечание": '',
+                        "Температура": air_temp,
+                        "Дата_время": {
                             "year": date_time['year'],
                             "month": date_time['month'],
                             "day": date_time['day'],
                             "hour": date_time['hour'],
                             "minute": date_time['minute'],
                             "second": 0
-                            },
-                        "air_temp": air_temp
+                            }
                     },
                     "geom": geom
                 }
