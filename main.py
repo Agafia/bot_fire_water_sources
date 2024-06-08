@@ -314,13 +314,16 @@ def cmd_save(message):
                                   f'<p>Исполнение: {specification}</p>'
                     if json_object['fields']['Водоотдача_сети']:
                         description += f"<p>Водоотдача: {json_object['fields']['Водоотдача_сети']}</p>"
-                    if json_object['fields']['ИД_папки_Гугл_диск']:
-                        description += f"<p><a href='https://drive.google.com/drive/folders/" \
-                                       f"{json_object['fields']['ИД_папки_Гугл_диск']}'>Фото на Google диске</a></p>"
+                    description += f"<p><a href='https://drive.google.com/drive/folders/" \
+                                   f"{google_folder}'>Фото на Google диске</a></p>"
                     if json_object['fields']['Ссылка_Гугл_улицы']:
                         description += f"<p><a href='{json_object['fields']['Ссылка_Гугл_улицы']}'>" \
                                        f"Просмотр улиц в Google</a></p>"
                     description += f"<hr><p><a href='{Config.bot_url}={data['fid']}'>Осмотр водоисточника с ИД-{data['fid']}</a></p>"
+
+                    json_company = nextgis.get_feature(Config.ngw_resource_wi_company, feature_id=json_object['id'])
+                    if json_company:
+                        description += f"<p>Обслуживает: {json_company['fields']['Хоз_субъект']}</p>"
 
                     nextgis.ngw_put_feature(Config.ngw_resource_wi_points,
                                             data['fid'],
@@ -501,10 +504,6 @@ def process_step(message):
 
         elif bot.get_state(bot.user.id, message.chat.id) == 'BotStates:position':  # Шаг 2.Координаты
             if step_position(message):
-                # bot.set_state(bot.user.id, BotStates.shot_medium, message.chat.id)
-                # msg = bot.send_message(message.chat.id, '📸 💦 <b>Шаг 3. Узловой снимок</b>', parse_mode='HTML')
-                # msg_id_append(msg)
-
                 bot.set_state(bot.user.id, BotStates.checkout, message.chat.id)
                 kb_rep = types.InlineKeyboardMarkup(row_width=1)
                 btn_1 = types.InlineKeyboardButton(value_lists['checkout'][0]+' (🌡 +1°C и выше)',
@@ -529,7 +528,7 @@ def process_step(message):
                 for i in range(0, len(value_lists['water'])):
                     button = types.InlineKeyboardButton(value_lists['water'][i], callback_data=value_lists['water'][i])
                     buttons.append(button)
-                kb_rep.add(*buttons)
+                kb_rep.add(*buttons)  # добавляем на форму используя распаковку аргументов
                 msg = bot.send_message(message.chat.id, '💦 <b>4. Наличие воды </b>',
                                        parse_mode='HTML', reply_markup=kb_rep)
                 msg_id_append(msg)
