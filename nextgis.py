@@ -77,6 +77,26 @@ def ngw_post_wi_checkup(fid_wi, checkout, water, workable, entrance, plate_exist
         logger.critical(f"Ошибка записи о проверке в NextGIS WEB: {exc}")
 
 
+def ngw_post_feature(resource_id: int, feature_id: int, fields_values: dict, geom: str = None,
+                     attachment: str = None, description: str = None):
+    try:
+        request_post = f'{Config.ngw_host}/api/resource/{resource_id}/feature/{feature_id}'
+        # data_post = {"fields": fields_values}
+        data_post = {
+            "extensions": {
+                "attachment": attachment,
+                "description": description
+                },
+            "fields": {fields_values},
+            "geom": geom
+            }
+        r_put = requests.put(request_post, data=json.dumps(data_post), auth=(Config.ngw_user, Config.ngw_password))
+        if r_put.status_code == 200:
+            return True
+    except Exception as exc:
+        logger.critical(f"Ошибка изменения объекта в NextGIS WEB: {exc}")
+
+
 def ngw_put_feature(resource_id: int, feature_id: int, fields_values: dict):
     try:
         request_put = f'{Config.ngw_host}/api/resource/{resource_id}/feature/{feature_id}'
