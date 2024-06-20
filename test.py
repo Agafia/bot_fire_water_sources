@@ -3,6 +3,7 @@ import pydrive
 from config import Config  # Параметры записаны в файл config.py
 import datetime
 import pytz
+import templates
 
 if __name__ == "__main__":
     resource = 91
@@ -40,6 +41,18 @@ if __name__ == "__main__":
         # fields = {'name': feature_caption}
 
         # ============================================================= Задать описание водоисточника
+        description = templates.description_water_intake(fid=feature_id,
+                                                            locality=song['fields']['Поселение'],
+                                                            street=song['fields']['Улица'],
+                                                            building=song['fields']['Дом'],
+                                                            landmark=song['fields']['Ориентир'],
+                                                            specification=song['fields']['Исполнение'],
+                                                            flow_rate_water=song['fields']['Водоотдача_сети'],
+                                                            google_folder=song['fields']['ИД_папки_Гугл_диск'],
+                                                            google_street=song['fields']['Ссылка_Гугл_улицы'],
+                                                            fid_wi_company=song['fields']['ИД_хоз_субъекта'])
+        fields_values = {'description': description}
+
         # description = f"<p>Адрес: {song['fields']['Поселение']}, " \
         #               f"{song['fields']['Улица']}, {song['fields']['Дом']}</p>" \
         #               f"<p>Ориентир: {song['fields']['Ориентир']}</p>" \
@@ -57,12 +70,12 @@ if __name__ == "__main__":
         # fields = {'description': description}
 
         # ============================================================= Обновить названия Гугл каталогов
-        folder_name = f"ИД-{feature_id} {song['fields']['name']} " \
-                      f"{song['fields']['Поселение']}, {song['fields']['Улица']}, {song['fields']['Дом']}"
-        print(folder_name)
-        google_folder = pydrive.create_folder(file_id=song['fields']['ИД_папки_Гугл_диск'],
-                                              file_name=folder_name,
-                                              parent_folder=Config.parent_folder_id)
+        # folder_name = f"ИД-{feature_id} {song['fields']['name']} " \
+        #               f"{song['fields']['Поселение']}, {song['fields']['Улица']}, {song['fields']['Дом']}"
+        # print(folder_name)
+        # google_folder = pydrive.create_folder(file_id=song['fields']['ИД_папки_Гугл_диск'],
+        #                                       file_name=folder_name,
+        #                                       parent_folder=Config.parent_folder_id)
 
     #     locality = song['fields']['wi_addr_locality']
     #     street = song['fields']['wi_addr_street']
@@ -79,11 +92,11 @@ if __name__ == "__main__":
 
         # ============================================================= Применить изменения
         # nextgis.ngw_put_feature(resource, feature_id, fields)
-
+        nextgis.ngw_put_feature(resource_id=resource, feature_id=feature_id,
+                                fields_values=fields_values, description=description)
 
         # for attribute, value in song.items():
         #     print(attribute, value)
-
 
     # current_time = datetime.datetime.now(pytz.timezone(Config.timezone))
     # print({'year': "{:02d}".format(current_time.year),
