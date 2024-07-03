@@ -23,6 +23,7 @@ from notifiers.logging import NotificationHandler
 from config import Config  # Параметры записаны в файл config.py
 import nextgis  # Функции для запросов к NextGIS WEB
 import pydrive
+import templates
 
 state_storage = StateMemoryStorage()
 apihelper.ENABLE_MIDDLEWARE = True
@@ -309,26 +310,31 @@ def cmd_save(message):
                     bot.edit_message_text(chat_id=msg_send.chat.id,
                                           message_id=msg_send.message_id, text=msg_text, parse_mode="html")
 
-                    description = f'<p>Адрес: {locality}, {street}, {building}</p>' \
-                                  f'<p>Ориентир: {landmark}</p>' \
-                                  f'<p>Исполнение: {specification}</p>'
-                    if json_object['fields']['Водоотдача_сети']:
-                        description += f"<p>Водоотдача: {json_object['fields']['Водоотдача_сети']}</p>"
-                    description += f"<p><a href='https://drive.google.com/drive/folders/" \
-                                   f"{google_folder}'>Фото на Google диске</a></p>"
-                    if json_object['fields']['Ссылка_Гугл_улицы']:
-                        description += f"<p><a href='{json_object['fields']['Ссылка_Гугл_улицы']}'>" \
-                                       f"Просмотр улиц в Google</a></p>"
-                    description += f"<hr><p><a href='{Config.bot_url}={data['fid']}'>Осмотр водоисточника с ИД-{data['fid']}</a></p>"
-
-                    json_company = nextgis.get_feature(Config.ngw_resource_wi_company, feature_id=json_object['id'])
-                    if json_company:
-                        description += f"<p>Обслуживает: {json_company['fields']['Хоз_субъект']}</p>"
-
-                    nextgis.ngw_put_feature(Config.ngw_resource_wi_points,
-                                            data['fid'],
-                                            {'ИД_папки_Гугл_диск': google_folder,
-                                             'description': description})
+                    description = templates.description_water_intake(fid=data['fid'], locality=locality,
+                                                                     street=street, building=building,
+                                                                     landmark=landmark, specification=specification,
+                                                                     flow_rate_water=json_object['fields']['Водоотдача_сети'],
+                                                                     google_folder=google_folder,
+                                                                     google_street=json_object['fields']['Ссылка_Гугл_улицы'],
+                                                                     fid_wi_company=json_object['fields']['ИД_хоз_субъекта'])
+                    fields_values = {'description': description, 'ИД_папки_Гугл_диск': google_folder}
+                    # description = f'<p>Адрес: {locality}, {street}, {building}</p>' \
+                    #               f'<p>Ориентир: {landmark}</p>' \
+                    #               f'<p>Исполнение: {specification}</p>'
+                    # if json_object['fields']['Водоотдача_сети']:
+                    #     description += f"<p>Водоотдача: {json_object['fields']['Водоотдача_сети']}</p>"
+                    # description += f"<p><a href='https://drive.google.com/drive/folders/" \
+                    #                f"{google_folder}'>Фото на Google диске</a></p>"
+                    # if json_object['fields']['Ссылка_Гугл_улицы']:
+                    #     description += f"<p><a href='{json_object['fields']['Ссылка_Гугл_улицы']}'>" \
+                    #                    f"Просмотр улиц в Google</a></p>"
+                    # description += f"<hr><p><a href='{Config.bot_url}={data['fid']}'>Осмотр водоисточника с ИД-{data['fid']}</a></p>"
+                    #
+                    # json_company = nextgis.get_feature(Config.ngw_resource_wi_company, feature_id=json_object['id'])
+                    # if json_company:
+                    #     description += f"<p>Обслуживает: {json_company['fields']['Хоз_субъект']}</p>"
+                    nextgis.ngw_put_feature(resource_id=Config.ngw_resource_wi_points, feature_id=data['fid'],
+                                            fields_values=fields_values, description=description)
 
                 date_name = f"{data['date_time']['year']}-{data['date_time']['month']}-{data['date_time']['day']}" \
                             f"_{data['date_time']['hour']}:{data['date_time']['minute']}"

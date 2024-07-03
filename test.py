@@ -42,15 +42,15 @@ if __name__ == "__main__":
 
         # ============================================================= Задать описание водоисточника
         description = templates.description_water_intake(fid=feature_id,
-                                                            locality=song['fields']['Поселение'],
-                                                            street=song['fields']['Улица'],
-                                                            building=song['fields']['Дом'],
-                                                            landmark=song['fields']['Ориентир'],
-                                                            specification=song['fields']['Исполнение'],
-                                                            flow_rate_water=song['fields']['Водоотдача_сети'],
-                                                            google_folder=song['fields']['ИД_папки_Гугл_диск'],
-                                                            google_street=song['fields']['Ссылка_Гугл_улицы'],
-                                                            fid_wi_company=song['fields']['ИД_хоз_субъекта'])
+                                                         locality=song['fields']['Поселение'],
+                                                         street=song['fields']['Улица'],
+                                                         building=song['fields']['Дом'],
+                                                         landmark=song['fields']['Ориентир'],
+                                                         specification=song['fields']['Исполнение'],
+                                                         flow_rate_water=song['fields']['Водоотдача_сети'],
+                                                         google_folder=song['fields']['ИД_папки_Гугл_диск'],
+                                                         google_street=song['fields']['Ссылка_Гугл_улицы'],
+                                                         fid_wi_company=song['fields']['ИД_хоз_субъекта'])
         fields_values = {'description': description}
 
         # description = f"<p>Адрес: {song['fields']['Поселение']}, " \

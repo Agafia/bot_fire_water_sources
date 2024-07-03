@@ -4,7 +4,7 @@ from pyproj import Transformer  # Преобразование координа�
 import nextgis
 import templates
 
-data = pd.read_excel('43.xlsx')  # Файл из которого осуществляется
+data = pd.read_excel('118_3.xlsx')  # Файл из которого осуществляется
 # Заголовки столбцов для сопоставления и передачи данных
 headers_int = ['ИД_хоз_субъекта', 'ИД_вид_ППВ', 'ИД_исп_ППВ', 'ИД_зоны_части',
                'ИД_верхего_МО', 'ИД_нижнего_МО', 'ИД_границ_НП']
@@ -42,6 +42,7 @@ for ind in data.index:  # Перебор строк
     geom = f'POINT({str(sm[0])} {str(sm[1])})'
 
     result = nextgis.ngw_post_feature(resource_id=91, fields_values=fields_dict, geom=geom)
+    print(fields_dict)
     if result:
         type = fields_dict.get('Вид_ВИ', None)
         num = fields_dict.get('Номер', None)

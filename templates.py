@@ -23,7 +23,7 @@ def description_water_intake(fid: int,  locality: str = None, street: str = None
 
     json_company = nextgis.get_feature(Config.ngw_resource_wi_company, feature_id=fid_wi_company)
     if json_company:
-        description += f"<p>Обслуживает: {json_company['fields']['Хоз_субъект']}</p>"
+        description += f"<p>Хоз.субъект: {json_company['fields']['Хоз_субъект']}</p>"
 
     return description
 
