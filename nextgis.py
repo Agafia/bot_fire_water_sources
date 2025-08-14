@@ -55,22 +55,25 @@ def ngw_post_wi_checkup(fid_wi, checkout, water, workable, entrance, plate_exist
                         "Примечание": '',
                         "Температура": air_temp,
                         "Дата_время": {
-                            "year": date_time['year'],
-                            "month": date_time['month'],
-                            "day": date_time['day'],
-                            "hour": date_time['hour'],
-                            "minute": date_time['minute'],
+                            "year": int(date_time['year']),
+                            "month": int(date_time['month']),
+                            "day": int(date_time['day']),
+                            "hour": int(date_time['hour']),
+                            "minute": int(date_time['minute']),
                             "second": 0
                             }
                     },
                     "geom": geom
                 }
+        logger.info(data)
         r_post = requests.post(request_post, data=json.dumps(data), auth=(Config.ngw_user, Config.ngw_password))
+        logger.info(f'Статус создания wi_checkup в NextGIS WEB: {r_post.status_code}')
         if r_post.status_code == 200:
             answer = json.loads(r_post.content.decode('utf-8'))
             request_put = f'{Config.ngw_host}/api/resource/{Config.ngw_resource_wi_checkup}/feature/{answer["id"]}'
             data_put = {"fields": {"id": answer["id"]}}
             r_put = requests.put(request_put, data=json.dumps(data_put), auth=(Config.ngw_user, Config.ngw_password))
+            logger.info(f'Статус редактирования wi_checkup в NextGIS WEB: {r_post.status_code}')
             if r_put.status_code == 200:
                 return True
     except Exception as exc:
