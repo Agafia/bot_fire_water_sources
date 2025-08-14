@@ -88,7 +88,7 @@ bot_states = {'None':                   'Шаг 0. Диалог не запущ�
 value_lists = {'checkout': ['установка с пуском воды', 'установка без пуска воды', 'осмотр полный', 'осмотр внешний'],
                'workable': ['возможна', 'невозможна', 'не установлено'],
                'entrance': ['возможен', 'невозможен', 'не установлено'],
-               'water': ['имеется', 'отсутсвует', 'не установлено'],
+               'water': ['имеется', 'отсутствует', 'не установлено'],
                'plate': ['отсутствует', 'есть (по ГОСТ)', 'есть (не ГОСТ)']}
 
 
@@ -147,7 +147,7 @@ def verification_user(message):  # Верификация пользовател
     # Статусы участников группы, которым доступна верификация
     members_status = ['creator', 'administrator', 'member', 'restricted']
     try:
-        member = bot.get_chat_member(Config.tg_group_id, message.from_user.id)
+        member = bot.get_chat_member(Config.tg_canal_id, message.from_user.id)
         if member.status in members_status:
             return True
         else:
@@ -385,7 +385,7 @@ def cmd_save(message):
                                             date_time=data['date_time'], geom=data['EPSG_3857'])
 
                 msg_in_grp = f"{data['name']}\n{date_name}"
-                bot.send_message(Config.tg_group_id, msg_in_grp)
+                bot.send_message(Config.tg_canal_id, msg_in_grp)
 
             bot.delete_state(bot.user.id, message.chat.id)
             msg_text += "\n<i>8. Сохранение данных завершено</i>"
