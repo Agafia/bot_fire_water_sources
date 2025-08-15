@@ -22,13 +22,6 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bot-fire-water-sources:latest
-          build-args:
-            BOT_TOKEN=${{ secrets.BOT_TOKEN }}
-            NGW_USER=${{ secrets.NGW_USER }}
-            NGW_PASSWORD=${{ secrets.NGW_PASSWORD }}
-
-      - name: Create service-secrets.json
-        run: echo "${{ secrets.SERVICE_SECRETS_JSON }}" > service-secrets.json
 
   deploy:
     needs: build_and_push
@@ -41,4 +34,5 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           script: |
+            echo "${{ secrets.SERVICE_SECRETS_JSON }}" > service-secrets.json
             ./deploy.sh
