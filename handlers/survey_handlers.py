@@ -339,9 +339,14 @@ async def cmd_save(message: Message, state: FSMContext, bot: Bot):
 
     except Exception as e:
         logger.error(f"Ошибка при сохранении: {e}")
-        await msg.edit_text(
+        await message.answer(
             f"<b>Произошла ошибка при сохранении данных.</b>\n"
             f"<i>Обратитесь к администратору.</i>\n"
             f"<code>{e}</code>"
         )
+        # await msg.edit_text(
+        #     f"<b>Произошла ошибка при сохранении данных.</b>\n"
+        #     f"<i>Обратитесь к администратору.</i>\n"
+        #     f"<code>{e}</code>"
+        # )
         await state.clear()

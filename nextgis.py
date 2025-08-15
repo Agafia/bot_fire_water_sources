@@ -69,6 +69,7 @@ def ngw_post_wi_checkup(fid_wi, checkout, water, workable, entrance, plate_exist
         r_post = requests.post(request_post, data=json.dumps(data), auth=(Config.ngw_user, Config.ngw_password))
         logger.info(f'Статус создания wi_checkup в NextGIS WEB: {r_post.status_code}')
         if r_post.status_code == 200:
+            logger.debug(r_post.text)
             answer = json.loads(r_post.content.decode('utf-8'))
             request_put = f'{Config.ngw_host}/api/resource/{Config.ngw_resource_wi_checkup}/feature/{answer["id"]}'
             data_put = {"fields": {"id": answer["id"]}}
@@ -145,6 +146,7 @@ def get_feature(resource_id: int, feature_id: int, **kwargs):
         r = requests.get(request_get, auth=(Config.ngw_user, Config.ngw_password))
         logger.info(f'Статус получения feature из NextGIS WEB: {r.status_code}')
         if r.status_code == 200:
+            logger.debug(r.text)
             content = json.loads(r.content.decode('utf-8'))
             return content
     except Exception as exc:
