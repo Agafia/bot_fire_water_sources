@@ -1,5 +1,4 @@
 import asyncio
-import pytest
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.base import StorageKey
@@ -48,7 +47,8 @@ def test_full_survey_flow(mocker):
         assert current_state == BotStates.position
 
         # 3. position
-        position_message = Message(message_id=3, date=125, chat=chat, from_user=user, location={'latitude': 55.7558, 'longitude': 37.6173}, bot=bot)
+        position_message = Message(message_id=3, date=125, chat=chat, from_user=user,
+                                   location={'latitude': 55.7558, 'longitude': 37.6173}, bot=bot)
         await survey_handlers.process_step_position(position_message, state)
         current_state = await state.get_state()
         assert current_state == BotStates.checkout

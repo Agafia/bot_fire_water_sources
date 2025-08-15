@@ -26,11 +26,6 @@ import time
 from locust import User, task, between
 
 
-
-
-
-
-
 class BotUser(User):
     wait_time = between(1, 5)
 
