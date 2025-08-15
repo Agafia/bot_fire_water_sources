@@ -9,6 +9,5 @@ tests
 *.pyo
 *.pyd
 service-secrets.json
-config.py
 # Environments
 .venv
