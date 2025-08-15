@@ -11,7 +11,7 @@ def description_water_intake(fid: int,  locality: str = None, street: str = None
                   f'<p>Исполнение: {specification}</p>'
 
     if flow_rate_water:
-        description += f"<p>Водоотдача: {flow_rate_water} л/с</p>"
+        description += f"<p>Водоотдача: {flow_rate_water}</p>"
 
     if google_folder:
         description += f"<p><a href='https://drive.google.com/drive/folders/{google_folder}'>Фото на Google диске</a></p>"
@@ -21,7 +21,7 @@ def description_water_intake(fid: int,  locality: str = None, street: str = None
 
     description += f"<p><a href='{Config.bot_url}={str(fid)}'>Осмотр водоисточника с ИД-{str(fid)}</a></p>"
 
-    json_company = nextgis.get_feature(Config.ngw_resource_wi_company, feature_id=fid_wi_company)
+    json_company = nextgis.get_feature(Config.ngw_resource_organization, feature_id=fid_wi_company)
     if json_company:
         description += f"<p>Хоз.субъект: {json_company['fields']['Хоз_субъект']}</p>"
 
