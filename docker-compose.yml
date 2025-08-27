@@ -10,19 +10,17 @@ services:
 
   bot:
     image: ${{ secrets.DOCKERHUB_USERNAME }}/bot-fire-water-sources:latest
+    env_file: .env
     command: python main.py
     depends_on:
       - redis
-    volumes:
-      - .:/app
 
   worker:
     image: ${{ secrets.DOCKERHUB_USERNAME }}/bot-fire-water-sources:latest
+    env_file: .env
     command: celery -A celery_app worker --loglevel=info
     depends_on:
       - redis
-    volumes:
-      - .:/app
 
 volumes:
   redis_data:
