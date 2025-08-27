@@ -19,6 +19,9 @@ class Config:
     tg_admin_id: str = '478031430'      # @SurgutFire
     tg_admin_chat: str = '-1002015129960' # Ошибки ботов (канал)
 
+    # Параметры Redis для Celery
+    redis_url: str = 'redis://redis:6379/0'
+
     # Параметры NextGIS WEB (ngw)
     ngw_host: str = 'https://spt-surgut.nextgis.com'
     ngw_user: str = os.environ.get('NGW_USER')

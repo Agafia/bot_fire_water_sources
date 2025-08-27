@@ -17,7 +17,8 @@ from loguru import logger
 
 from config import Config
 from handlers import common_handlers, survey_handlers
-from middlewares import verification_user
+from handlers.admin_handlers import admin_router
+from middlewares import verification_user, admin_check
 
 # Логирование
 logger.add('logs/log_aiogram.log', level='WARNING', rotation='10 MB', compression='zip', catch=True)
@@ -29,11 +30,18 @@ async def main() -> None:
     bot = Bot(token=Config.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
 
-    # Регистрируем middleware для всех message и callback_query
+    # --- РЕГИСТРАЦИЯ MIDDLEWARE ---
+    # Это middleware будет применяться ко всем хендлерам, кроме админских
     dp.message.middleware(verification_user)
     dp.callback_query.middleware(verification_user)
 
-    # Подключаем роутеры
+    # Middleware для проверки прав администратора. Применяется только к admin_router
+    admin_router.message.middleware(admin_check)
+
+    # --- ПОДКЛЮЧЕНИЕ РОУТЕРОВ ---
+    # Сначала регистрируем админский роутер, чтобы его команды имели приоритет
+    dp.include_router(admin_router)
+    # Затем остальные роутеры
     dp.include_router(survey_handlers.router)
     dp.include_router(common_handlers.router)
 

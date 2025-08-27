@@ -5,6 +5,91 @@ import datetime
 import pytz
 import templates
 
+
+
+async def update_nextgis():
+    """ Обновление наименований Google-каталогов и описаний в NextGIS WEB """
+    resource_wi = Config.ngw_resource_wi_points
+    resource_org = Config.ngw_resource_organization
+    json_points = await nextgis.get_features(resource_wi, fields_list=['id'], geom='no', extensions='none')
+
+    for point in json_points:
+        fields = {}
+
+        point_id = point['id']
+        if not point_id:
+            print(f'{"=" * 10} Ошибка на: {point}')
+            continue
+        # ============================================================= Задать копию ИД водоисточника
+        if point_id != point['fields']['ИД']:
+            fields['ИД'] = point_id
+        # ============================================================= Задать подпись водоисточника
+        point_type = point['fields']['Вид_ВИ']
+        point_type = 'ВИ' if not point_type else point_type
+        point_num = point['fields']['Номер']
+        point_num = '__' if not point_num else point_num
+        point_spec = point['fields']['Характеристика']
+        point_spec = '__' if not point_spec else point_spec
+        caption = f'{point_type}-{point_num} ({point_spec})'
+        fields['name'] = caption
+        # ============================================================= Задать описание водоисточника
+        locality = point['fields']['Поселение']
+        locality = '__' if not locality else locality
+        street = point['fields']['Улица']
+        street = '__' if not street else street
+        building = point['fields']['Дом']
+        building = '__' if not building else building
+        landmark = point['fields']['Ориентир']
+        landmark = '--' if not landmark else landmark
+        specification = point['fields']['Исполнение']
+        specification = '--' if not specification else specification
+        water_loss = point['fields']['Водоотдача_сети']
+        water_loss = '--' if not water_loss else water_loss
+
+        folder_id = point['fields']['ИД_папки_Гугл_диск']
+        folder_name = f"ИД-{point_id} {caption} {locality}, {street}, {building}"
+
+        description = f'<p>Адрес: {locality}, {street}, {building}</p>' \
+                      f'<p>Ориентир: {landmark}</p>' \
+                      f'<p>Исполнение: {specification}</p>'  \
+                      f'<p>Водоотдача: {water_loss}</p>'
+
+        if folder_id:
+            description += f"<p><a href='https://drive.google.com/drive/folders/" \
+                           f"{folder_id}' target='_blank'>Фото на Google диске</a></p>"
+            # ============================================================= Обновить названия Гугл каталогов
+            # pydrive.create_folder(file_id=folder_id, file_name=folder_name, parent_folder=Config.parent_folder_id)
+            # print(f'file_id={folder_id}, file_name={folder_name}, parent_folder={Config.parent_folder_id}')
+
+
+        if point['fields']['Ссылка_Гугл_улицы']:
+            description += f"<p><a href='{point['fields']['Ссылка_Гугл_улицы']}' target='_blank'>" \
+                           f"Просмотр улиц в Google</a></p>"
+
+        description += f"<p><a href='{Config.bot_bot}={point_id}'>Осмотр водоисточника с ИД-{point_id}</a></p>"
+
+        organization_id = point['fields']['ИД_хоз_субъекта']
+        if organization_id:
+            json_org = await nextgis.get_feature(resource_id=resource_org, feature_id=organization_id)
+            if json_org:
+                organization = json_org['fields']['Хоз_субъект']
+                description += f'<p>Хоз.субъект: {organization}</p>'
+
+        fields['description'] = description
+        extensions = {'description': description}
+        fields_values = {'fields': fields, 'extensions': extensions}
+        print(fields_values)
+
+
+        # ============================================================= Применить изменения
+        await nextgis.ngw_put_feature(resource_wi, point_id, fields_values)
+        print(f'{folder_name}')
+
+
+
+
+
+
 if __name__ == "__main__":
     resource = 91
     # print(nextgis.get_features_array(55, limit=5, offset=55, order_by=['name', 'wi_addr_building'],

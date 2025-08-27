@@ -18,10 +18,30 @@ async def verification_user(handler, event, data):
     except TelegramBadRequest as exc:
         if "user not found" in exc.message:
             await event.answer('⚠ Вы не являетесь участником канала, необходимого для работы с ботом.')
-            logger.warning(f'Пользователь {event.from_user.id} н�� найден в канале.')
+            logger.warning(f'Пользователь {event.from_user.id} не найден в канале.')
         else:
             logger.critical(f'Ошибка API при верификации пользователя: {exc}')
             await event.answer(f'⚠ Ошибка API при верификации: {exc.message}. Убедитесь, что бот является администратором в канале.')
     except Exception as exc:
         logger.critical(f'Неожиданная ошибка верификации пользователя: {exc}')
         await event.answer('⚠ Произошла непредвиденная ошибка верификации. Обратитесь к администратору.')
+
+
+async def admin_check(handler, event, data):
+    """Проверяет, является ли пользователь администратором или создателем канала."""
+    bot = data['bot']
+    admin_statuses = ['creator', 'administrator']
+    try:
+        member = await bot.get_chat_member(Config.tg_canal_id, event.from_user.id)
+        if member.status in admin_statuses:
+            return await handler(event, data)
+        else:
+            logger.warning(f'Пользователь {event.from_user.id} без прав администратора пытался использовать команду.')
+            # Молча игнорируем, чтобы не привлекать внимание
+            return
+    except TelegramBadRequest:
+        logger.warning(f'Пользователь {event.from_user.id} не найден в канале при проверке прав администратора.')
+        return  # Молча игнорируем
+    except Exception as exc:
+        logger.critical(f'Непредвиденная ошибка при проверке прав администратора: {exc}')
+        return # Молча игнорируем

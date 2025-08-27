@@ -1,11 +1,14 @@
 import datetime
 import json
-from unittest.mock import patch, Mock, MagicMock
+from unittest.mock import patch, Mock, MagicMock, AsyncMock
 
 import pytest
+from aiogram.types import Message, User
 from freezegun import freeze_time
 
+from handlers.admin_handlers import cmd_update
 from handlers.survey_handlers import date_time_now
+from middlewares import admin_check
 from nextgis import get_feature, ngw_post_wi_checkup
 from pydrive import create_folder
 
@@ -159,3 +162,69 @@ def test_create_folder_trashed(mock_google_drive, mock_google_auth, mocker):
 
     # Проверка
     assert folder_id == 'new_folder_id_recursive'
+
+# --- Новые тесты для админ-функционала ---
+
+@pytest.mark.asyncio
+async def test_admin_check_middleware_is_admin(mocker):
+    """Тест: middleware admin_check пропускает администратора."""
+    # Создаем mock для следующего обработчика в цепочке
+    handler_mock = AsyncMock()
+
+    # Мокируем get_chat_member, чтобы он возвращал администратора
+    bot_mock = MagicMock()
+    admin_member = MagicMock()
+    admin_member.status = 'administrator'
+    bot_mock.get_chat_member = AsyncMock(return_value=admin_member)
+
+    # Готовим данные для middleware
+    event = MagicMock()
+    event.from_user.id = 123
+    data = {'bot': bot_mock}
+
+    # Вызываем middleware
+    await admin_check(handler_mock, event, data)
+
+    # Проверяем, что следующий обработчик был вызван
+    handler_mock.assert_called_once_with(event, data)
+
+
+@pytest.mark.asyncio
+async def test_admin_check_middleware_not_admin(mocker):
+    """Тест: middleware admin_check НЕ пропускает обычного пользователя."""
+    handler_mock = AsyncMock()
+
+    # Мокируем get_chat_member, чтобы он возвращал обычного участника
+    bot_mock = MagicMock()
+    member = MagicMock()
+    member.status = 'member'
+    bot_mock.get_chat_member = AsyncMock(return_value=member)
+
+    event = MagicMock()
+    event.from_user.id = 456
+    data = {'bot': bot_mock}
+
+    await admin_check(handler_mock, event, data)
+
+    # Проверяем, что следующий обработчик НЕ был вызван
+    handler_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_cmd_update_calls_celery_task(mocker):
+    """Тест: команда /update вызывает Celery задачу."""
+    # Мокируем метод delay у задачи Celery
+    mock_celery_task = mocker.patch('handlers.admin_handlers.update_nextgis_data.delay')
+
+    # Создаем мок сообщения от пользователя
+    message_mock = AsyncMock(spec=Message)
+    message_mock.from_user = User(id=123, is_bot=False, first_name="Admin")
+
+    # Вызываем обработчик команды
+    await cmd_update(message_mock)
+
+    # Проверяем, что метод answer был вызван для информирования пользователя
+    message_mock.answer.assert_called_once()
+
+    # Проверяем, что задача Celery была вызвана
+    mock_celery_task.assert_called_once()

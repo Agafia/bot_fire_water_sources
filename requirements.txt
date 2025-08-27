@@ -13,5 +13,7 @@ pytest-mock
 freezegun~=1.5.5
 pytest-asyncio
 locust~=2.38.1
+celery==5.3.6
+redis==5.0.4
 
 python-dotenv~=1.1.1
